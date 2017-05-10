@@ -11,3 +11,5 @@ out
 lfw-*
 *.wav
 *cd01
+*small_raw*
+*.csv

@@ -1,25 +1,18 @@
 import tensorflow as tf
+from tensorflow.contrib.tensorboard.plugins import projector
 import numpy as np
 from model import Autoencoder
 import sys
 import os
+import csv
+from utils import get_slices
 
-# Get the features
-np_data = np.load(sys.argv[1])
-n = len(np_data)
+# get feature slices and meta data
+n, slices, meta = get_slices(sys.argv[1])
 
-slices = []
-
-# Preprocess the features
-for k in range(n):
-    tmp = np_data[k]
-    start = range(0, len(tmp) + 1, 50)
-    stop = start[2:]
-    L = [tmp[i : j] for i, j in zip(start, stop)]
-    slices += L
-
-slices = np.array(slices)
-n = len(slices)
+# Save tsv metadata
+meta_writer = csv.writer(open("logs/meta.tsv", "w"), delimiter="\t")
+meta_writer.writerows(meta)
 
 # create autoencoder
 ae = Autoencoder()
@@ -30,6 +23,12 @@ ae.train()
 projs = tf.Variable(tf.truncated_normal([n, ae.bottleneck_dim]), name="projections")
 projs_ass = tf.assign(projs, ae.encoder)
 proj_saver = tf.train.Saver([projs])
+
+# Straight from tensorflow
+config = projector.ProjectorConfig()
+embedding = config.embeddings.add()
+embedding.tensor_name = projs.name
+embedding.metadata_path = "logs/meta.tsv"
 
 # Do the training
 init = tf.global_variables_initializer()
@@ -70,6 +69,7 @@ for i in range(iters):
     if i%10 == 0 and "log" in sys.argv:
         m, tr_err, _ = sess.run([merged, "err:0", projs_ass], feed_dict={"raw_data:0": slices})
         train_writer.add_summary(m, i)
+        projector.visualize_embeddings(train_writer, config)
         ae.saver.save(sess, "/tmp/tf/model.cpkt", global_step=i)
         proj_saver.save(sess, "/tmp/tf/proj.cpkt", global_step=i)
 
