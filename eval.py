@@ -3,6 +3,7 @@ import numpy as np
 import scipy.ndimage as image
 import matplotlib.pyplot as plt
 from model import Autoencoder
+from conv import ConvEncoder
 import sys
 from utils import get_slices
 
@@ -10,7 +11,7 @@ from utils import get_slices
 n, slices, meta = get_slices(sys.argv[1])
 
 # create autoencoder
-ae = Autoencoder()
+ae = ConvEncoder()
 ae.build_model()
 ae.train()
 
@@ -20,7 +21,7 @@ if len(sys.argv) > 1:
 
 # Restore
 sess = tf.Session()
-ae.load(sess, iters)
+ae.load(sess, iters, sys.argv[1])
 print()
 print()
 print("------------------------------")

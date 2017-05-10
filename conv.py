@@ -1,18 +1,18 @@
 import tensorflow as tf
 import numpy as np
 
-class Autoencoder:
-    """ Autoencoder class
+class ConvEncoder:
+    """ Convolutional Autoencoder class
     """
     
-    def __init__(self, image_dims=[100, 26, 1], bottleneck_dim=40):
+    def __init__(self, image_dims=[100, 26], bottleneck_dim=40):
         """ Sets hyper-parameters
 
         Input:
             image_dims: image dimensions (default [100, 26])
             bottleneck_dim: dimension of bottleneck layer (default 40)
         """
-        self.name = "Base_model"
+        self.name = "Conv_model"
         self.image_dims = image_dims
         self.bottleneck_dim = bottleneck_dim
     
@@ -20,6 +20,8 @@ class Autoencoder:
         """ Builds model graph
         """
         self.images = tf.placeholder(tf.float32, [None] + self.image_dims, name="raw_data")
+
+        self.batch_size = tf.shape(self.images)[0]
 
         self.encoder = self.encoder(self.images)
         self.decoder = self.decoder(self.encoder)
@@ -42,28 +44,43 @@ class Autoencoder:
     def encoder(self, images):
         """ Builds encoder graph
         """
-        # flatten image
-        k = np.prod(self.image_dims) 
-        x = tf.reshape(images, [tf.shape(images)[0], k], name="x")
+        x0 = tf.reshape(images, [self.batch_size] + self.image_dims + [1])
 
-        # pass through linear layer
-        W = tf.Variable(tf.truncated_normal([k, self.bottleneck_dim], stddev=0.01))
-        b = tf.Variable(tf.truncated_normal([self.bottleneck_dim], stddev=0.01))
-        h = tf.nn.xw_plus_b(x, W, b, name="bottleneck")
-        return h
+        # First convolutional layer
+        W1 = tf.Variable(tf.truncated_normal([3, 3, 1, 1], stddev=0.01))
+        x1 = tf.nn.conv2d(x0, W1, [1, 1, 1, 1], padding="SAME")
+        h1 = tf.nn.relu(x1)
+
+        # Fully connected layer
+        self.flat_len = np.prod(h1.get_shape().as_list()[1:])
+        flat = tf.reshape(h1, [tf.shape(h1)[0], self.flat_len])
+        Wf = tf.Variable(tf.truncated_normal([flat.get_shape().as_list()[1], self.bottleneck_dim], stddev=0.01))
+        bf = tf.Variable(tf.truncated_normal([self.bottleneck_dim], stddev=0.01))
+        xf = tf.nn.xw_plus_b(flat, Wf, bf, name="bottleneck")
+        hf = tf.nn.relu(xf)
+
+        self.shapes = [tf.shape(x0), tf.shape(x1), tf.shape(flat)]
+        return hf
 
 
     def decoder(self, bottleneck):
         """ Builds decoder graph
         """
-        # pass through linear layer
-        k = np.prod(self.image_dims) 
-        W = tf.Variable(tf.truncated_normal([self.bottleneck_dim, k], stddev=0.01))
-        b = tf.Variable(tf.truncated_normal([k], stddev=0.01))
-        y = tf.nn.xw_plus_b(bottleneck, W, b, name="y")
+
+        # Linear upsampling
+        Wf = tf.Variable(tf.truncated_normal([self.bottleneck_dim, self.flat_len], stddev=0.01))
+        bf = tf.Variable(tf.truncated_normal([self.flat_len], stddev=0.01))
+        xf = tf.nn.xw_plus_b(bottleneck, Wf, bf)
+        hf = tf.nn.relu(xf)
+        cuboided = tf.reshape(hf, self.shapes[1])
+
+        # First deconv
+        W1 = tf.Variable(tf.truncated_normal([3, 3, 1, 1], stddev=0.01))
+        x1 = tf.nn.conv2d_transpose(cuboided, W1, self.shapes[0], [1, 1, 1, 1])
+        h1 = tf.nn.relu(x1)
         
         # reshape to image
-        return tf.reshape(y, [tf.shape(bottleneck)[0]] + self.image_dims, name="raw_out")
+        return tf.reshape(h1, [self.batch_size] + self.image_dims, name="raw_out")
 
     def save(self, sess, iters, name=""):
         """ Saves tensorflow graph

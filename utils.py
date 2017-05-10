@@ -23,4 +23,6 @@ def get_slices(data_file):
 
     slices = np.array(slices)
     n = len(slices)
+
+    #slices = slices.reshape(list(slices.shape) + [1]) 
     return n, slices, meta

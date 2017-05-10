@@ -2,6 +2,7 @@ import tensorflow as tf
 from tensorflow.contrib.tensorboard.plugins import projector
 import numpy as np
 from model import Autoencoder
+from conv import ConvEncoder
 import sys
 import os
 import csv
@@ -15,7 +16,7 @@ meta_writer = csv.writer(open("logs/meta.tsv", "w"), delimiter="\t")
 meta_writer.writerows(meta)
 
 # create autoencoder
-ae = Autoencoder()
+ae = ConvEncoder()
 ae.build_model()
 ae.train()
 
@@ -79,6 +80,6 @@ for i in range(iters):
     print(i)
 
 # Save trained model
-save_path = ae.save(sess, iters)
+save_path = ae.save(sess, iters, sys.argv[1])
 print("Saved model in {0}".format(save_path))
 
