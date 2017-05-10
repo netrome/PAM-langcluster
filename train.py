@@ -6,16 +6,17 @@ from conv import ConvEncoder
 import sys
 import os
 import csv
-from utils import get_slices
+from utils import get_slices, images_to_sprite
+import scipy.misc
 
-# get feature slices and meta data
+# Get feature slices and meta data
 n, slices, meta = get_slices(sys.argv[1])
 
 # Save tsv metadata
 meta_writer = csv.writer(open("logs/meta.tsv", "w"), delimiter="\t")
 meta_writer.writerows(meta)
 
-# create autoencoder
+# Create autoencoder
 ae = ConvEncoder()
 ae.build_model()
 ae.train()
@@ -30,6 +31,12 @@ config = projector.ProjectorConfig()
 embedding = config.embeddings.add()
 embedding.tensor_name = projs.name
 embedding.metadata_path = "logs/meta.tsv"
+if "sprite" in sys.argv:
+    sprite = images_to_sprite(slices)
+    sprite_path =sys.argv[1].replace("eval_data", "sprites") + "sprite.png"
+    scipy.misc.imsave(sprite_path, sprite)
+    embedding.sprite.image_path = sprite_path
+    embedding.sprite.single_image_dim.extend([26, 100])
 
 # Do the training
 init = tf.global_variables_initializer()
