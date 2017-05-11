@@ -13,3 +13,5 @@ lfw-*
 *cd01
 *small_raw*
 *.csv
+sprites/
+.*.swp

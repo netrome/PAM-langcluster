@@ -3,6 +3,7 @@ from tensorflow.contrib.tensorboard.plugins import projector
 import numpy as np
 from model import Autoencoder
 from conv import ConvEncoder
+from deepconv import DeepConvEncoder
 import sys
 import os
 import csv
@@ -17,7 +18,7 @@ meta_writer = csv.writer(open("logs/meta.tsv", "w"), delimiter="\t")
 meta_writer.writerows(meta)
 
 # Create autoencoder
-ae = ConvEncoder()
+ae = DeepConvEncoder()
 ae.build_model()
 ae.train()
 

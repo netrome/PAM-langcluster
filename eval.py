@@ -4,6 +4,7 @@ import scipy.ndimage as image
 import matplotlib.pyplot as plt
 from model import Autoencoder
 from conv import ConvEncoder
+from deepconv import DeepConvEncoder
 import sys
 from utils import get_slices
 
@@ -11,7 +12,7 @@ from utils import get_slices
 n, slices, meta = get_slices(sys.argv[1])
 
 # create autoencoder
-ae = ConvEncoder()
+ae = DeepConvEncoder()
 ae.build_model()
 ae.train()
 
