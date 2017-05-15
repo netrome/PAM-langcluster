@@ -57,3 +57,20 @@ def images_to_sprite(data):
     data = data.reshape((n * data.shape[1], n * data.shape[3]) + data.shape[4:])
     data = (data * 255).astype(np.uint8)
     return data
+
+def get_annotated_features(data_file):
+    # Get the features
+    np_data = np.load(data_file)
+    meta_reader = csv.reader(open(data_file.replace(".npy", ".csv"), "r"))
+    n = len(np_data)
+
+    meta = [next(meta_reader)]
+
+    # Preprocess the features
+    for k in range(n):
+        next_csv = next(meta_reader)
+        meta.append(next_csv)
+
+    return np_data, meta
+    
+
