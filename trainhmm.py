@@ -17,12 +17,13 @@ meta = meta[1:] # Drop title row
 languages = [a[0] for a in meta]
 unique = set(languages)
 lang_data = {}
+lengths = {}
 hmms = {}
 
 # Initialize empty list and hmm for each language
 for lang in unique:
     lang_data[lang] = []
-    hmms[lang] = hmm.GMMHMM(n_components=33, n_mix=11)
+    hmms[lang] = hmm.GMMHMM(n_components=4, n_mix=40)
 
 # Append data to dictionary
 for i, lang in enumerate(languages):
@@ -30,6 +31,7 @@ for i, lang in enumerate(languages):
 
 # Concatenate samples in dict
 for lang in unique: 
+    lengths[lang] = [sample.shape[0] for sample in lang_data[lang]]
     lang_data[lang] = np.concatenate(lang_data[lang], axis=0) #Explicit is better than implicit
 
 #method for training hmm
@@ -37,7 +39,7 @@ def train(lang):
     global lang_data
     global hmms
     print("Training HMM on ", lang)
-    hmms[lang].fit(lang_data[lang])
+    hmms[lang].fit(lang_data[lang], lengths=lengths[lang])
     return hmms[lang]
 
 with Pool(os.cpu_count()) as p:
