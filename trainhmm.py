@@ -7,6 +7,9 @@ from utils import get_annotated_features
 import sys
 import numpy as np
 import pickle
+from multiprocessing import Pool
+import os
+
 
 # Get data and metadata
 data, meta = get_annotated_features(sys.argv[1])
@@ -19,7 +22,7 @@ hmms = {}
 # Initialize empty list and hmm for each language
 for lang in unique:
     lang_data[lang] = []
-    hmms[lang] = hmm.GMMHMM(n_components=5, n_mix=11)
+    hmms[lang] = hmm.GMMHMM(n_components=33, n_mix=11)
 
 # Append data to dictionary
 for i, lang in enumerate(languages):
@@ -29,11 +32,24 @@ for i, lang in enumerate(languages):
 for lang in unique: 
     lang_data[lang] = np.concatenate(lang_data[lang], axis=0) #Explicit is better than implicit
 
-# Train and save hmms
-for lang in unique:
+#method for training hmm
+def train(lang):
+    global lang_data
+    global hmms
     print("Training HMM on ", lang)
     hmms[lang].fit(lang_data[lang])
+    return hmms[lang]
 
-    pickle.dump(hmms, open("saved_hmms.pickle", "wb"))
+with Pool(os.cpu_count()) as p:
+    hmm_list = p.map(train,unique) 
+    for i, lang in enumerate(unique):
+       hmms[lang] = hmm_list[i] 
+        
+
+print("gonna save")
+
+pickle.dump(hmms, open("saved_hmms.pickle", "wb"))
+# Train and save hmms
+
 
 

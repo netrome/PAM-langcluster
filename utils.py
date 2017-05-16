@@ -2,7 +2,7 @@ import numpy as np
 import csv
 import scipy.misc
 
-def get_slices(data_file):
+def get_slices(data_file, time_dist=50):
     # Get the features
     np_data = np.load(data_file)
     meta_reader = csv.reader(open(data_file.replace(".npy", ".csv"), "r"))
@@ -16,7 +16,7 @@ def get_slices(data_file):
         tmp = np_data[k]
         next_csv = next(meta_reader)
 
-        start = range(0, len(tmp) + 1, 50)
+        start = range(0, len(tmp) + 1, time_dist)
         stop = start[2:]
         L = [tmp[i : j] for i, j in zip(start, stop)]
         meta += [next_csv for i, j in zip(start, stop)]
@@ -27,6 +27,24 @@ def get_slices(data_file):
 
     #slices = slices.reshape(list(slices.shape) + [1]) 
     return n, slices, meta
+
+def slice_samples(np_data, time_dist=50):
+    n = len(np_data)
+
+    slices = []
+
+    # Preprocess the features
+    for k in range(n):
+        tmp = np_data[k]
+
+        start = range(0, len(tmp) + 1, time_dist)
+        stop = start[2:]
+        L = [tmp[i : j] for i, j in zip(start, stop)]
+        slices.append(L)
+
+    slices = np.array(slices)
+    return slices
+
 
 def images_to_sprite(data):
     """Creates the sprite image along with any necessary padding

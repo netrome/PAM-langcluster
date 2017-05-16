@@ -10,7 +10,7 @@ import csv
 place = os.getcwd()
 meta_path = place + "/meta/"
 pattern_path = place + "/sounds/"
-data_path = place + "/small_raw/"
+data_path = place + "/test_raw/"
 meta = [["Language", "Age", "Sex"]] # Going to become a csv file
 
 # Clear directories

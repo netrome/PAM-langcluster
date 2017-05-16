@@ -18,7 +18,8 @@ meta_writer = csv.writer(open("logs/meta.tsv", "w"), delimiter="\t")
 meta_writer.writerows(meta)
 
 # Create autoencoder
-ae = DeepConvEncoder()
+#ae = DeepConvEncoder()
+ae = Autoencoder()
 ae.build_model()
 ae.train()
 

@@ -5,7 +5,7 @@ class Autoencoder:
     """ Autoencoder class
     """
     
-    def __init__(self, image_dims=[100, 26, 1], bottleneck_dim=40):
+    def __init__(self, image_dims=[100, 26], bottleneck_dim=40):
         """ Sets hyper-parameters
 
         Input:
