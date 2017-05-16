@@ -12,6 +12,7 @@ lfw-*
 *.wav
 *cd01
 *small_raw*
+saved_hmms/
 *.csv
 sprites/
 .*.swp

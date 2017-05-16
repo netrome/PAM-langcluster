@@ -15,7 +15,7 @@ pred_languages = ["nope" for a in meta]
 unique = set(languages)
 
 # Get hmms
-hmms = pickle.load(open("saved_hmms.pickle", "rb"))
+hmms = pickle.load(open(sys.argv[2], "rb"))
 
 # Evaluate hmms
 score = 0

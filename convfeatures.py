@@ -9,12 +9,12 @@ import sys
 from utils import slice_samples
 
 np_data = np.load(sys.argv[1])
-slices = slice_samples(np_data, int(sys.argv[3]))
+slices = slice_samples(np_data, time_dist=int(sys.argv[3]))
 print(slices.shape)
 
 # create autoencoder
 #ae = DeepConvEncoder()
-ae = Autoencoder()
+ae = Autoencoder(image_dims=[20, 26])
 ae.build_model()
 ae.train()
 
@@ -29,7 +29,7 @@ print()
 print()
 print("------------------------------")
 
-# Test the model
+# Use the model
 features = []
 for sample in slices:
     out = sess.run("bottleneck:0", feed_dict={"raw_data:0": sample})

@@ -11,7 +11,7 @@ from utils import get_slices, images_to_sprite
 import scipy.misc
 
 # Get feature slices and meta data
-n, slices, meta = get_slices(sys.argv[1])
+n, slices, meta = get_slices(sys.argv[1], time_dist=10)
 
 # Save tsv metadata
 meta_writer = csv.writer(open("logs/meta.tsv", "w"), delimiter="\t")
@@ -19,7 +19,7 @@ meta_writer.writerows(meta)
 
 # Create autoencoder
 #ae = DeepConvEncoder()
-ae = Autoencoder()
+ae = Autoencoder(image_dims=[20, 26])
 ae.build_model()
 ae.train()
 

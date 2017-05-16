@@ -48,7 +48,9 @@ with Pool(os.cpu_count()) as p:
 
 print("gonna save")
 
-pickle.dump(hmms, open("saved_hmms.pickle", "wb"))
+data_name = sys.argv[1].split("/")[-1].split(".")[0]
+
+pickle.dump(hmms, open("saved_hmms/" + data_name + ".pickle", "wb"))
 # Train and save hmms
 
 
