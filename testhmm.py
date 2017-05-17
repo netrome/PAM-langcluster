@@ -6,6 +6,7 @@ from utils import get_annotated_features
 import sys
 import numpy as np
 import pickle
+import sklearn.metrics as metrics
 
 # Get data
 data, meta = get_annotated_features(sys.argv[1])
@@ -20,11 +21,13 @@ hmms = pickle.load(open(sys.argv[2], "rb"))
 # Evaluate hmms
 score = 0
 for i, sample in enumerate(data):
-    print("-------", languages[i])
+    if i%100 == 0:
+        print("-------", languages[i])
     max_val = -np.inf
     for lang in hmms:
         prob = hmms[lang].score(sample)
-        print(lang, " score: ", prob)
+        if i%100 == 0:
+            print(lang, " score: ", prob)
 
         if prob > max_val:
             max_val = prob
@@ -35,6 +38,8 @@ for i, sample in enumerate(data):
 score /= len(languages)
 print("<<<<<<<<<<<<<<<<<<<  HERE COMES THE SCORE, DUBIDUBI  >>>>>>>>>>>>>>>>>>>>>")
 print(score)
-
+confusion_matrix = metrics.confusion_matrix(languages, pred_languages, labels=unique)
+print(unique)
+print(confusion_matrix)
 
     

@@ -18,6 +18,12 @@ patterns = []
 
 for path in data:
     rate, sig = wav.read(path)
+    sig = sig.astype("float64")
+
+    if "norm" in sys.argv:
+        sig -= np.mean(sig)
+        sig /= np.std(sig)
+
     if "mfcc" in sys.argv:
         feat = mfcc(sig, rate)
     elif "fbank" in sys.argv:
